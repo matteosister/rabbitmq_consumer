@@ -1,0 +1,4 @@
+RabbitmqConsumer
+================
+
+** TODO: Add description **

@@ -1,0 +1,11 @@
+consumer:
+    image: matteosister/elixir:1.0.5
+    links:
+        - rabbitmq
+    volumes:
+        - .:/app
+
+rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+        - "25672:15672"
