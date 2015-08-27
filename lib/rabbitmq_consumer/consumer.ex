@@ -2,28 +2,32 @@ defmodule RabbitmqConsumer.Consumer do
   use GenServer
   use AMQP
 
-  @exchange    "rabbitmq_consumer"
-  @queue       "rabbitmq_consumer"
-  @queue_error "#{@queue}_error"
-
   def start_link do
-    GenServer.start_link(__MODULE__, [], name: :consumer)
+    GenServer.start_link(__MODULE__, options, name: :consumer)
   end
 
-  def init(_opts) do
-    {:ok, conn} = Connection.open("amqp://guest:guest@rabbitmq")
+  defp options do
+    [
+      url: "amqp://guest:guest@rabbitmq",
+      exchange: "rabbitmq_consumer",
+      queue: "rabbitmq_consumer"
+    ]
+  end
+
+  def init([url: url, exchange: exchange, queue: queue]) do
+    {:ok, conn} = Connection.open(url)
     {:ok, chan} = Channel.open(conn)
     # Limit unacknowledged messages to 10
     #Basic.qos(chan, prefetch_count: 10)
-    Queue.declare(chan, @queue_error, durable: false)
+    #Queue.declare(chan, @queue_error, durable: false)
     # Messages that cannot be delivered to any consumer in the main queue will be routed to the error queue
-    Queue.declare(chan, @queue, durable: false,
-                                arguments: [{"x-dead-letter-exchange", :longstr, ""},
-                                            {"x-dead-letter-routing-key", :longstr, @queue_error}])
-    Exchange.fanout(chan, @exchange, durable: false)
-    Queue.bind(chan, @queue, @exchange)
+    #Queue.declare(chan, queue, durable: false,
+    #                            arguments: [{"x-dead-letter-exchange", :longstr, ""},
+    #                                        {"x-dead-letter-routing-key", :longstr, @queue_error}])
+    Exchange.fanout(chan, exchange, durable: false)
+    Queue.bind(chan, queue, exchange)
     # Register the GenServer process as a consumer
-    {:ok, _consumer_tag} = Basic.consume(chan, @queue)
+    {:ok, _consumer_tag} = Basic.consume(chan, queue)
     {:ok, chan}
   end
 

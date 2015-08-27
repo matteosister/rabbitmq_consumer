@@ -4,6 +4,7 @@ consumer:
         - rabbitmq
     volumes:
         - .:/app
+    working_dir: /app
 
 rabbitmq:
     image: rabbitmq:3-management
