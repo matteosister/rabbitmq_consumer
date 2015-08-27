@@ -2,16 +2,12 @@ defmodule RabbitmqConsumer.Consumer do
   use GenServer
   use AMQP
 
-  def start_link do
-    GenServer.start_link(__MODULE__, options, name: :consumer)
-  end
-
-  defp options do
-    [
-      url: "amqp://guest:guest@rabbitmq",
-      exchange: "rabbitmq_consumer",
-      queue: "rabbitmq_consumer"
-    ]
+  def start_link(url, exchange, queue) do
+    GenServer.start_link(
+      __MODULE__,
+      [url: url, exchange: exchange, queue: queue],
+      name: :consumer
+    )
   end
 
   def init([url: url, exchange: exchange, queue: queue]) do
@@ -21,7 +17,7 @@ defmodule RabbitmqConsumer.Consumer do
     #Basic.qos(chan, prefetch_count: 10)
     #Queue.declare(chan, @queue_error, durable: false)
     # Messages that cannot be delivered to any consumer in the main queue will be routed to the error queue
-    #Queue.declare(chan, queue, durable: false,
+    Queue.declare(chan, queue, durable: false)
     #                            arguments: [{"x-dead-letter-exchange", :longstr, ""},
     #                                        {"x-dead-letter-routing-key", :longstr, @queue_error}])
     Exchange.fanout(chan, exchange, durable: false)
