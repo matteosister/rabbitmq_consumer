@@ -44,6 +44,7 @@ defmodule RabbitmqConsumer.Consumer do
 
   def handle_info({:basic_deliver, payload, %{delivery_tag: tag, redelivered: redelivered}}, chan) do
     spawn fn -> consume(chan, tag, redelivered, payload) end
+    Executer.execute("ls -la")
     {:noreply, chan}
   end
 
