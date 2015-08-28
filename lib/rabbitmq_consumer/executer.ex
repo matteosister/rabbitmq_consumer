@@ -7,16 +7,12 @@ defmodule RabbitmqConsumer.Executer do
   end
 
   def execute(executer) do
-    spawn(fn ->
-      do_execute(executer)
-    end)
+    spawn(fn -> do_execute(executer) end)
   end
 
   defp do_execute(executer = %RabbitmqConsumer.Executer{channel: channel, tag: tag, cmd: cmd}) do
-    IO.puts executer
-    :timer.sleep(2000)
     Basic.ack channel, tag
-    IO.puts "eseguito #{cmd}"
+    IO.puts "eseguito #{executer}"
   end
 end
 

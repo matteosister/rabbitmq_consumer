@@ -7,6 +7,8 @@ defmodule RabbitmqConsumer do
   main entry point for the script
   """
   def main(args) do
+    RabbitmqConsumer.CLI.parse_args(args)
+    System.halt(0)
     {parsed, _, _} = parse_args(args)
     if parsed[:help] do
       IO.puts @moduledoc
@@ -49,16 +51,16 @@ defmodule RabbitmqConsumer do
     ]
   end
 
+  defp required_args do
+    [:url, :exchange, :queue, :cmd]
+  end
+
   defp validate_parsed_args(parsed) do
     Enum.each required_args, fn (required_arg) ->
       unless Keyword.has_key?(parsed, required_arg) do
         IO.puts "You have to pass the #{required_arg} option."
       end
     end
-  end
-
-  defp required_args do
-    [:url, :exchange, :queue, :cmd]
   end
 
   defp command_options_help do
