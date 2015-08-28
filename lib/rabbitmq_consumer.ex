@@ -78,17 +78,17 @@ defmodule RabbitmqConsumer do
   defp help_string(unknown_switch), do: raise "unable to find help string for switch #{unknown_switch}"
 
   defp alias_for_switch(nil), do: ""
-  defp alias_for_switch({alias_name, alias_ref}), do: "-" <> to_string(alias_name)
+  defp alias_for_switch({alias_name, _}), do: "-" <> to_string(alias_name)
 
   defp find_alias_by_switch_name(name, ifnone \\ nil) do
     Enum.find(
       aliases,
       ifnone,
-      fn ({alias_name, alias_ref}) -> alias_ref == name end
+      fn ({_, alias_ref}) -> alias_ref == name end
     )
   end
 
-  defp map_switch(switch = {name, _}) do
+  defp map_switch({name, _}) do
     found_alias = find_alias_by_switch_name(name)
     [to_string(name), alias_for_switch(found_alias), help_string(name)]
   end

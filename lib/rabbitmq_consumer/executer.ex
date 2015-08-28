@@ -1,12 +1,27 @@
 defmodule RabbitmqConsumer.Executer do
-  def execute(cmd) do
+  use AMQP
+  defstruct cmd: nil, channel: nil, tag: nil, routing_key: "", payload: nil
+
+  def new(cmd, channel, tag, routing_key, payload) do
+    %RabbitmqConsumer.Executer{cmd: cmd, channel: channel, tag: tag, routing_key: routing_key, payload: payload}
+  end
+
+  def execute(executer) do
     spawn(fn ->
-      do_execute(cmd)
+      do_execute(executer)
     end)
   end
 
-  defp do_execute(cmd) do
-    :timer.sleep(2)
+  defp do_execute(executer = %RabbitmqConsumer.Executer{channel: channel, tag: tag, cmd: cmd}) do
+    IO.puts executer
+    :timer.sleep(2000)
+    Basic.ack channel, tag
     IO.puts "eseguito #{cmd}"
+  end
+end
+
+defimpl String.Chars, for: RabbitmqConsumer.Executer do
+  def to_string(%RabbitmqConsumer.Executer{cmd: cmd, tag: tag, routing_key: routing_key, payload: payload}) do
+    "%RabbitmqConsumer.Executer{cmd: \"#{cmd}\", tag: #{tag}, routing_key: \"#{routing_key}\", payload: \"#{payload}\"}"
   end
 end

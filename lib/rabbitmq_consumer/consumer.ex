@@ -1,6 +1,7 @@
 defmodule RabbitmqConsumer.Consumer do
   use GenServer
   use AMQP
+  alias RabbitmqConsumer.Executer
 
   def start_link(url, exchange, queue) do
     GenServer.start_link(
@@ -42,29 +43,10 @@ defmodule RabbitmqConsumer.Consumer do
     {:noreply, chan}
   end
 
-  def handle_info({:basic_deliver, payload, %{delivery_tag: tag, redelivered: redelivered}}, chan) do
-    spawn fn -> consume(chan, tag, redelivered, payload) end
-    Executer.execute("ls -la")
+  def handle_info({:basic_deliver, payload, %{delivery_tag: tag, routing_key: routing_key}}, chan) do
+    #spawn fn -> consume(chan, tag, redelivered, payload) end
+    executer = Executer.new("ls -la", chan, tag, routing_key, payload)
+    Executer.execute(executer)
     {:noreply, chan}
-  end
-
-  defp consume(channel, tag, redelivered, payload) do
-    try do
-      number = String.to_integer(payload)
-      if number <= 10 do
-        Basic.ack channel, tag
-        IO.puts "Consumed a #{number}."
-      else
-        Basic.reject channel, tag, requeue: false
-        IO.puts "#{number} is too big and was rejected."
-      end
-    rescue
-      exception ->
-        # Requeue unless it's a redelivered message.
-        # This means we will retry consuming a message once in case of exception
-        # before we give up and have it moved to the error queue
-        Basic.reject channel, tag, requeue: not redelivered
-        IO.puts "Error converting #{payload} to integer"
-    end
   end
 end
