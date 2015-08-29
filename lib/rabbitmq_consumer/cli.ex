@@ -2,6 +2,7 @@ defmodule RabbitmqConsumer.CLI do
   @moduledoc """
   This script consumes messages from rabbitmq and call an external command to do the actual processing
   """
+
   use RabbitmqConsumer.CLIHelper
 
   defp switches do

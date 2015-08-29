@@ -1,8 +1,6 @@
 defmodule RabbitmqConsumer.CLIHelper do
   defmacro __using__(_options) do
     quote do
-      import unquote(__MODULE__)
-
       def parse_args(args) do
         all_switches = Enum.concat(switches, help_switch) |> Enum.uniq
         all_aliases = Enum.concat(aliases, help_alias) |> Enum.uniq
@@ -36,13 +34,13 @@ defmodule RabbitmqConsumer.CLIHelper do
       defp alias_for_switch(nil), do: ""
       defp alias_for_switch({alias_name, _}), do: "-" <> to_string(alias_name)
 
-      def switches, do: []
-      def aliases, do: []
-      def required_switches, do: []
-      def help_switch, do: [help: :boolean]
-      def help_alias, do: [h: :help]
+      defp switches, do: []
+      defp aliases, do: []
+      defp required_switches, do: []
+      defp help_switch, do: [help: :boolean]
+      defp help_alias, do: [h: :help]
 
-      def help_string(:help), do: "displays this help message"
+      defp help_string(:help), do: "displays this help message"
 
       defoverridable [switches: 0, aliases: 0, required_switches: 0, help_string: 1]
     end
