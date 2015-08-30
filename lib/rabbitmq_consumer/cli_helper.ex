@@ -5,8 +5,10 @@ defmodule RabbitmqConsumer.CLIHelper do
         all_switches = Enum.concat(switches, help_switch) |> Enum.uniq
         all_aliases = Enum.concat(aliases, help_alias) |> Enum.uniq
         res = {parsed, _, _} = OptionParser.parse(args, switches: all_switches, aliases: all_aliases)
+        parsed = Keyword.merge(defaults, parsed)
+        Application.put_env(:elixir, :ansi_enabled, parsed[:ansi])
         if parsed[:help] do
-          IO.puts @moduledoc
+          IO.puts(IO.ANSI.format([:green, @moduledoc]))
           #IO.puts "usage: rabbitmq_consumer [options]"
           IO.puts "Options:"
           IO.puts RabbitmqConsumer.CLIHelper.command_options_help(all_switches, switch_mapper(all_aliases))
@@ -36,8 +38,9 @@ defmodule RabbitmqConsumer.CLIHelper do
 
       defp switches, do: []
       defp aliases, do: []
+      defp defaults, do: [ansi: true]
       defp required_switches, do: []
-      defp help_switch, do: [help: :boolean]
+      defp help_switch, do: [help: :boolean, ansi: :boolean]
       defp help_alias, do: [h: :help]
 
       defp help_string(:help), do: "displays this help message"
