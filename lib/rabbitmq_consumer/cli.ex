@@ -12,8 +12,7 @@ defmodule RabbitmqConsumer.CLI do
       help: :boolean,
       queue: :string,
       url: :string,
-      verbose: :boolean,
-      pippo: :boolean
+      verbose: :boolean
     ]
   end
 
@@ -24,8 +23,7 @@ defmodule RabbitmqConsumer.CLI do
       h: :help,
       q: :queue,
       u: :url,
-      v: :verbose,
-      p: :pippo
+      v: :verbose
     ]
   end
 
@@ -38,6 +36,7 @@ defmodule RabbitmqConsumer.CLI do
   defp help_string(:help), do: "display this help message"
   defp help_string(:queue), do: "the queue name"
   defp help_string(:url), do: "rabbit amqp uri specification (https://www.rabbitmq.com/uri-spec.html)"
-  defp help_string(:verbose), do: "verbosity level"
-  defp help_string(_), do: "pippo!"
+  defp help_string(:verbose), do: "verbosity"
+  defp help_string(:ansi), do: "ansi output"
+  defp help_string(_), do: ""
 end

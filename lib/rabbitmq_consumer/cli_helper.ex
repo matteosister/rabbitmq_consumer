@@ -11,17 +11,23 @@ defmodule RabbitmqConsumer.CLIHelper do
           IO.puts(IO.ANSI.format([:green, @moduledoc]))
           #IO.puts "usage: rabbitmq_consumer [options]"
           IO.puts "Options:"
-          IO.puts RabbitmqConsumer.CLIHelper.command_options_help(all_switches, switch_mapper(all_aliases))
+          IO.puts RabbitmqConsumer.CLIHelper.command_options_help(all_switches, switch_reducer(all_aliases))
           System.halt(0)
         end
         RabbitmqConsumer.CLIHelper.validate_parsed_args(parsed, required_switches)
         res
       end
 
-      defp switch_mapper(aliases) do
-        fn ({name, _}) ->
+      defp switch_reducer(aliases) do
+        fn ({name, type}, acc) ->
           found_alias = alias_for_switch_name(name, aliases)
-          [to_string(name), alias_for_switch(found_alias), help_string(name)]
+          new_element = [to_string(name), alias_for_switch(found_alias), help_string(name)]
+          if type == :boolean do
+            [head|tail] = new_element
+            new_head = head <> " --no-" <> head
+            new_element = [new_head|tail]
+          end
+          List.insert_at(acc, -1, new_element)
         end
       end
 
@@ -42,8 +48,7 @@ defmodule RabbitmqConsumer.CLIHelper do
       defp required_switches, do: []
       defp help_switch, do: [help: :boolean, ansi: :boolean]
       defp help_alias, do: [h: :help]
-
-      defp help_string(:help), do: "displays this help message"
+      defp help_string(_), do: ""
 
       defoverridable [switches: 0, aliases: 0, required_switches: 0, help_string: 1]
     end
@@ -58,15 +63,20 @@ defmodule RabbitmqConsumer.CLIHelper do
     end
   end
 
-  def command_options_help(switches, switch_mapper) do
+  def command_options_help(switches, switch_reducer) do
     switches
-    |> Enum.map(switch_mapper)
+    |> Enum.reduce([], switch_reducer)
     |> Enum.map(&justify_mapped_switch/1)
-    |> Enum.map(fn (switch) -> Enum.join(switch, "   ") end)
+    |> Enum.map(&colorize/1)
+    |> Enum.map(fn (switch) -> Enum.join(switch, "  ") end)
     |> Enum.join("\n")
   end
 
   defp justify_mapped_switch([cmd, cmd_alias, description]) do
-    ["  --" <> String.ljust(cmd, 10), String.rjust(cmd_alias, 3), description]
+    ["  --" <> String.ljust(cmd, 25), String.rjust(cmd_alias <> " ", 4), description]
+  end
+
+  defp colorize([cmd, cmd_alias, description]) do
+    [IO.ANSI.format([:green, :bright, cmd]), IO.ANSI. format([:yellow, :bright, :black_background, cmd_alias]), description]
   end
 end
