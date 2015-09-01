@@ -1,5 +1,6 @@
 consumer:
-    image: matteosister/elixir:1.0.5
+    #image: matteosister/elixir:1.0.5
+    build: .
     links:
         - rabbitmq
     volumes:

@@ -11,8 +11,9 @@ defmodule RabbitmqConsumer.Executer do
   end
 
   defp do_execute(executer = %RabbitmqConsumer.Executer{channel: channel, tag: tag, cmd: cmd}) do
-    Basic.ack channel, tag
-    IO.puts "eseguito #{executer}"
+    IO.puts cmd
+    #Basic.ack channel, tag
+    #IO.puts "eseguito #{executer}"
   end
 end
 
